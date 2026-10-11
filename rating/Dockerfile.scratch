@@ -1,0 +1,36 @@
+FROM node:23.11-slim AS builder
+
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /opt/microservices
+
+COPY package.json ./
+RUN npm install --omit=dev
+
+COPY ratings.js ./
+
+# Collect Node's shared libraries and dynamic loader.
+RUN mkdir -p /runtime \
+    && ldd /usr/local/bin/node \
+    | awk '/=> \// {print $3} /^[[:space:]]*\// {print $1}' \
+    | xargs -r cp -L --parents -t /runtime
+
+FROM scratch
+
+COPY --from=builder /runtime/ /
+COPY --from=builder /usr/local/bin/node /usr/local/bin/node
+COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
+COPY --from=builder /opt/microservices /opt/microservices
+
+WORKDIR /opt/microservices
+
+ARG service_version=v1
+ENV SERVICE_VERSION=${service_version}
+
+USER 1000:1000
+
+EXPOSE 9080
+
+CMD ["/usr/local/bin/node", "/opt/microservices/ratings.js", "9080"]
