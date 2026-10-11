@@ -1,0 +1,22 @@
+name: CI productpage
+
+on:
+  push:
+    paths:
+      - 'productpage/**'
+      - '.github/workflows/ci-productpage.yml'
+      - '.github/workflows/build-app.yml'
+  pull_request:
+    paths:
+      - 'productpage/**'
+      - '.github/workflows/ci-productpage.yml'
+      - '.github/workflows/build-app.yml'
+  workflow_dispatch:
+
+jobs:
+  build:
+    uses: ./.github/workflows/build-app.yml
+    with:
+      app: productpage
+      image: myatsumon/productpage-app
+    secrets: inherit

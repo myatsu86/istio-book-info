@@ -1,0 +1,22 @@
+name: CI reviews
+
+on:
+  push:
+    paths:
+      - 'reviews/**'
+      - '.github/workflows/ci-reviews.yml'
+      - '.github/workflows/build-app.yml'
+  pull_request:
+    paths:
+      - 'reviews/**'
+      - '.github/workflows/ci-reviews.yml'
+      - '.github/workflows/build-app.yml'
+  workflow_dispatch:
+
+jobs:
+  build:
+    uses: ./.github/workflows/build-app.yml
+    with:
+      app: reviews
+      image: myatsumon/reviews-app
+    secrets: inherit

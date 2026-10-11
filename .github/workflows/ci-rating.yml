@@ -1,0 +1,22 @@
+name: CI rating
+
+on:
+  push:
+    paths:
+      - 'rating/**'
+      - '.github/workflows/ci-rating.yml'
+      - '.github/workflows/build-app.yml'
+  pull_request:
+    paths:
+      - 'rating/**'
+      - '.github/workflows/ci-rating.yml'
+      - '.github/workflows/build-app.yml'
+  workflow_dispatch:
+
+jobs:
+  build:
+    uses: ./.github/workflows/build-app.yml
+    with:
+      app: rating
+      image: myatsumon/rating-app
+    secrets: inherit

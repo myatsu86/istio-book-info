@@ -1,28 +1,34 @@
 name: CI
 
+# Main pipeline: builds every app. Per-app pipelines (ci-<app>.yml) run on their own path changes.
 on:
-  push:
-  pull_request:
   workflow_dispatch:
 
 jobs:
-  build:
-    runs-on: ubuntu-latest
+  details:
+    uses: ./.github/workflows/build-app.yml
+    with:
+      app: details
+      image: myatsumon/details-app
+    secrets: inherit
 
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+  productpage:
+    uses: ./.github/workflows/build-app.yml
+    with:
+      app: productpage
+      image: myatsumon/productpage-app
+    secrets: inherit
 
-      - name: Build Docker image
-        run: docker build -f rating/Dockerfile.scratch -t myatsumon/rating-app:scratch-v2 rating
+  rating:
+    uses: ./.github/workflows/build-app.yml
+    with:
+      app: rating
+      image: myatsumon/rating-app
+    secrets: inherit
 
-      - name: Log in to Docker Hub
-        if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
-        env:
-          DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
-          DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
-        run: printf '%s' "$DOCKERHUB_TOKEN" | docker login --username "$DOCKERHUB_USERNAME" --password-stdin
-
-      - name: Push Docker image
-        if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
-        run: docker push myatsumon/rating-app:scratch-v2
+  reviews:
+    uses: ./.github/workflows/build-app.yml
+    with:
+      app: reviews
+      image: myatsumon/reviews-app
+    secrets: inherit
