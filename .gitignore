@@ -1,0 +1,32 @@
+# macOS
+.DS_Store
+
+# Editor / IDE
+.idea/
+.vscode/
+*.swp
+
+# Node (rating)
+node_modules/
+npm-debug.log*
+
+# Python (productpage)
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+
+# Ruby (details)
+.bundle/
+vendor/bundle/
+
+# Java / Gradle (reviews)
+.gradle/
+build/
+*.class
+*.war
+
+# Logs and env files
+*.log
+.env

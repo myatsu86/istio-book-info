@@ -1,0 +1,34 @@
+FROM ruby:3.4.3-alpine AS builder
+
+WORKDIR /opt/microservices
+ENV BUNDLE_PATH=/opt/gems \
+    BUNDLE_DEPLOYMENT=true \
+    BUNDLE_WITHOUT="development:test"
+
+# Build tools are only needed here, in case a gem requires native compilation
+RUN apk add --no-cache build-base
+
+COPY Gemfile Gemfile.lock ./
+RUN bundle install && rm -rf /opt/gems/ruby/*/cache
+
+FROM ruby:3.4.3-alpine AS runtime
+
+WORKDIR /opt/microservices
+ENV BUNDLE_PATH=/opt/gems \
+    BUNDLE_DEPLOYMENT=true \
+    BUNDLE_WITHOUT="development:test"
+
+COPY --from=builder /opt/gems /opt/gems
+COPY Gemfile Gemfile.lock ./
+COPY details.rb ./
+
+ARG service_version
+ENV SERVICE_VERSION=${service_version:-v1}
+ARG enable_external_book_service
+ENV ENABLE_EXTERNAL_BOOK_SERVICE=${enable_external_book_service:-false}
+
+EXPOSE 9080
+
+USER 1000
+
+CMD ["ruby", "details.rb", "9080"]

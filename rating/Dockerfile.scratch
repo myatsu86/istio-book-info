@@ -6,8 +6,12 @@ RUN apt-get update \
 
 WORKDIR /opt/microservices
 
-COPY package.json ./
-RUN npm install --omit=dev
+# CHANGED: copy package-lock.json too, so npm ci can install the exact locked versions
+COPY package.json package-lock.json ./
+# CHANGED: npm install -> npm ci (reproducible, fails if lockfile is out of sync)
+# CHANGED: added BuildKit cache mount for the npm cache to speed up rebuilds
+RUN --mount=type=cache,target=/root/.npm \
+    npm ci --omit=dev
 
 COPY ratings.js ./
 
